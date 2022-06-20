@@ -409,5 +409,19 @@ delay(500);
 
 
 ♫♫♫ Ziua 6 - incurajata si de tatal meu si avand toate piesele necesare, m-am hotarat sa fac un radio functional.
+Piesele necesare:
+-Placa plexiglas pentru montarea a doua placi beadboard full-sized din cauza multitudinii de module si fire
+-2 breadboard-uri full-sized
+-Modul Radio-FM, numit RDA 5807M
+-Translator de nivel logic (traduce nivelul semnalelor logice trimise de placuta Arduino de la 5V la 3.3V => nu ard placuta Radio)
+-Modul amplificator, numit PAM8403
+-Display cu interfata I2C
+-2 difuzoare
+-sursa de alimentare a breadboard-ului; doresc ca radio-ul sa functioneze independent de laptop
+-alimentator
+-antena ~70 cm
+-jumper wires
+-4 butoane: Volume Up, Volume Down, Frequency Up, Frequency Down
+
 
 
