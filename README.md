@@ -408,3 +408,6 @@ delay(500);
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
+♫♫♫ Ziua 6 - incurajata si de tatal meu si avand toate piesele necesare, m-am hotarat sa fac un radio functional.
+
+
