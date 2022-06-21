@@ -465,6 +465,61 @@ void loop() {
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 
+-Am facut un montaj cu un fotorezistor-> cand detecteaza lumina, ledul se aprinde. Cand nu, ledul se stinge. Cod folosit:
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+const int sensorPin = 0;
+const int ledPin = 9;
+
+int lightLevel, high = 0, low = 1023;
+
+
+void setup()
+{
+  pinMode(ledPin, OUTPUT);
+}
+
+
+void loop()
+{
+  lightLevel = analogRead(sensorPin);
+  manualTune();  // manually change the range from light to dark
+  analogWrite(ledPin, lightLevel);
+
+}
+
+
+void manualTune()
+{
+
+  lightLevel = map(lightLevel, 350, 800, 0, 255);
+  lightLevel = constrain(lightLevel, 0, 255);
+} 
+
+
+void autoTune()
+{
+  
+  if (lightLevel < low)
+  {
+    low = lightLevel;
+  }
+
+  if (lightLevel > high)
+  {
+    high = lightLevel;
+  }
+
+
+  lightLevel = map(lightLevel, low+10, high-10, 0, 255);
+  lightLevel = constrain(lightLevel, 0, 255);
+
+
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 Incurajata si de tatal meu si avand toate piesele necesare, m-am hotarat sa fac un radio functional.
 Piesele necesare:
 -Placa plexiglas pentru montarea a doua placi beadboard full-sized din cauza multitudinii de module si fire
