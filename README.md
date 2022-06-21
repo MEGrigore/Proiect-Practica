@@ -715,12 +715,10 @@ void loop() {
     if (millis() - lastButtonPress > 50) {
       Serial.println("Button pressed!");
     }
-
-    // Remember last button press event
+    
     lastButtonPress = millis();
   }
 
-  // Put in a slight delay to help debounce the reading
   delay(1);
 }
 
