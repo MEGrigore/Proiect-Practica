@@ -408,7 +408,64 @@ delay(500);
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-♫♫♫ Ziua 6 - incurajata si de tatal meu si avand toate piesele necesare, m-am hotarat sa fac un radio functional.
+♫♫♫ Ziua 6 - Am facut un montaj care afiseaza temperatura, umiditatea si indicele de caldura (temperatura simtita de corpul uman) folosind un display OLED si un senzor DHT22 de temperatura si umiditate. Cod folosit:
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#include "U8glib.h"
+#include "DHT.h"
+#define DHTPIN 2 
+#define DHTTYPE DHT22 
+DHT dht(DHTPIN, DHTTYPE); 
+U8GLIB_SH1106_128X64 u8g(13, 11, 10, 9, 8);  // D0=13, D1=11, CS=10, DC=9, Reset=8
+void setup() {
+  dht.begin(); 
+  u8g.firstPage();  
+  do {
+    u8g.setFont(u8g_font_helvB10);  
+    u8g.drawStr(30, 10, "Welcome "); 
+    u8g.drawStr(50, 30, "To ");
+    u8g.drawStr(10, 50, "ElectronicsHob");
+    u8g.drawStr(10, 60, "byists.com");
+  } while( u8g.nextPage() );
+  delay(5000);  
+}
+void loop() {
+  float hum = dht.readHumidity(); 
+  float temp = dht.readTemperature(); 
+  float fah = dht.readTemperature(true);
+  if (isnan(hum) || isnan(temp) || isnan(fah)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }
+  float heat_index = dht.computeHeatIndex(fah, hum);
+  float heat_indexC = dht.convertFtoC(heat_index);    //Calculating the heat index in Celsius
+  
+  u8g.firstPage();  
+  do {
+    u8g.setFont(u8g_font_helvR12);  
+    u8g.drawStr(0, 15, "Temp:");  
+    u8g.setPrintPos(75, 15);
+    u8g.print(temp, 0);
+    u8g.print((char)176);
+    u8g.print("C");
+    
+    u8g.drawStr(0, 35, "Humi:");
+    u8g.setPrintPos(75, 35);
+    u8g.print(hum, 0);
+    u8g.print("%");
+    
+    u8g.drawStr(0, 55, "Hi:");
+    u8g.setPrintPos(75, 55);
+    u8g.print(heat_indexC, 0);
+    u8g.print("%");
+  } while( u8g.nextPage() );
+  delay(5000);
+}
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+Incurajata si de tatal meu si avand toate piesele necesare, m-am hotarat sa fac un radio functional.
 Piesele necesare:
 -Placa plexiglas pentru montarea a doua placi beadboard full-sized din cauza multitudinii de module si fire
 -2 breadboard-uri full-sized
@@ -422,6 +479,7 @@ Piesele necesare:
 -antena ~70 cm
 -jumper wires
 -4 butoane: Volume Up, Volume Down, Frequency Up, Frequency Down
+
 
 
 
