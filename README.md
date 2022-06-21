@@ -519,6 +519,157 @@ void autoTune()
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 
+♫♫♫ Ziua 7 - Am mai facut un montaj cu senzorul BMP180 de presiune atmosferica: Se afiseaza pe un display I2C temperatura si presiunea atmosferica sub forma de loading bar. Video youtube: https://www.youtube.com/watch?v=0IojNYgDD7U . Cod folosit:
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/* Display temperature from BMP180 as Bargraph on LCD 
+ *  Original Sources: 
+ *  BMP180 library from https://www.sparkfun.com/products/11824
+ *  LCD library: https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
+ *  Bargraph library from https://playground.arduino.cc/Code/LcdBarGraph/
+ *  
+ *  
+ *  Written and Update by Ahmad Shamshiri on June 05, 2019
+ *  for Robojax in Ajax, Ontario
+  Watch Video tutorial for this code : https://youtu.be/0IojNYgDD7U
+  if you need the schematic diagram of this circuit, please visit  http://bit.ly/rj-udemy
+
+* Robojax Arduino Course on Udemy where  you get Schematic Diagram of this sketch 
+ * and many other robotics related lectures and codes. Purchase the course here: http://bit.ly/rj-udemy
+
+
+- (GND) to GND
++ (VDD) to 3.3V
+
+(WARNING: do not connect + to 5V or the sensor will be damaged!)
+
+*/
+
+#include <SFE_BMP180.h>
+#include <Wire.h>
+
+
+SFE_BMP180 rjt;// creating object called "rjt" (robojax temperature)
+#define UNIT 'C' // unit type C for Celsius F for Fahrenheit
+#define maxTemperature 40 // is the value in Celsius or Fahrenheit set in line above
+
+// LCD settings
+#include <LiquidCrystal_I2C.h>
+byte lcdNumCols = 16; // -- number of columns in the LCD
+byte lcdLine = 2; // -- number of line in the LCD
+
+LiquidCrystal_I2C lcd(0x3f,lcdNumCols,lcdLine); //0x3f is address for I2C
+                  // to get I2C address, run I2C Scanner. 
+                  //Link is provided (in same page as this code) at http://robojax.com/learn/arduino
+// bargraph settings
+#include <LcdBarGraphRobojax.h>
+LcdBarGraphRobojax robojax(&lcd, 16, 0, 0);  // -- creating 16 character long bargraph starting at char 0 of line 0 (see video)
+
+
+
+void setup()
+{
+  Serial.begin(9600);//initialize serial monitor
+ // -- initializing the LCD
+  lcd.begin();
+  lcd.clear();
+  lcd.print("Robojax"); 
+   
+ 
+  // Initialize the sensor (it is important to get calibration values stored on the device).
+
+  if (rjt.begin())
+  {
+   lcd.setCursor (0,1); //  
+    lcd.print("BMP180 Bargraph");  
+  }else {
+    lcd.setCursor (0,1); //  
+    lcd.print("BMP180 Failed"); 
+    while(1); // Pause forever.
+  }
+  // -- give use some time to read the text above
+  delay(2000);
+  lcd.clear();  
+}// setup
+
+void loop()
+{
+ // Robojax BMP180 Bargraph main loop
+
+ robojax.clearLine(1);// clear line 1 to display fresh temperature
+ float T = getTemp();// get the temperature
+ float Tgraph=T;
+ if(T !=999){
+     if( Tgraph > maxTemperature){   
+        Tgraph =0;
+     }
+        robojax.drawValue( Tgraph, maxTemperature);// draw the bargraph     
+      // Print out the measurement:
+      Serial.print("temperature: ");
+      Serial.print(T,2);
+
+
+      lcd.setCursor (0,1); //
+      if(T< maxTemperature){       
+       lcd.print("Temp.:"); 
+      }else{
+       lcd.print("Max.:"); 
+      }
+      lcd.setCursor (7,1); //
+      lcd.print(T); // print  
+      lcd.print((char)223);// prints degree symbol
+      if(UNIT =='C'){
+        lcd.print("C");//
+        Serial.println(" deg C");         
+      }else{
+        lcd.print("F");
+        Serial.println(" deg F");         
+      }
+      
+  }else{
+    Serial.print("Status error");
+      lcd.setCursor (0,1); //
+      lcd.print("Error ");     
+  }
+
+delay(500);
+}
+
+ ////////////////////////////////////////////
+double getTemp(){
+    char status;
+  double Temp,newTemp;
+ 
+status = rjt.startTemperature();
+  if (status != 0)
+  {
+    // Wait for the measurement to complete:
+    delay(status);
+
+    // Retrieve the completed temperature measurement:
+    // Note that the measurement is stored in the variable T.
+    // Function returns 1 if successful, 0 if failure.
+
+    status = rjt.getTemperature(Temp);
+    if (status != 0)
+    {  
+      if (UNIT =='F')
+      {
+        newTemp = (9.0/5.0)*Temp+32.0;// convert to degrees farenheit
+      }else{
+        newTemp = Temp;// keeps degree celsius
+      }
+    }
+    return newTemp;    
+  }else{
+    return 999;// if error, then retuen 999
+  }
+}//getTemp/////////////////////////////
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 Incurajata si de tatal meu si avand toate piesele necesare, m-am hotarat sa fac un radio functional.
 Piesele necesare:
