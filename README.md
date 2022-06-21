@@ -523,29 +523,6 @@ void autoTune()
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-/* Display temperature from BMP180 as Bargraph on LCD 
- *  Original Sources: 
- *  BMP180 library from https://www.sparkfun.com/products/11824
- *  LCD library: https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
- *  Bargraph library from https://playground.arduino.cc/Code/LcdBarGraph/
- *  
- *  
- *  Written and Update by Ahmad Shamshiri on June 05, 2019
- *  for Robojax in Ajax, Ontario
-  Watch Video tutorial for this code : https://youtu.be/0IojNYgDD7U
-  if you need the schematic diagram of this circuit, please visit  http://bit.ly/rj-udemy
-
-* Robojax Arduino Course on Udemy where  you get Schematic Diagram of this sketch 
- * and many other robotics related lectures and codes. Purchase the course here: http://bit.ly/rj-udemy
-
-
-- (GND) to GND
-+ (VDD) to 3.3V
-
-(WARNING: do not connect + to 5V or the sensor will be damaged!)
-
-*/
-
 #include <SFE_BMP180.h>
 #include <Wire.h>
 
@@ -670,8 +647,87 @@ status = rjt.startTemperature();
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+-Am folosit un modul encoder rotativ (Rotary encoder) pentru a face un montaj care afiseaza in Serial Monitor directia de rotatie a butonului cat si numarul de unitati cu care s-a rotit. Cod folosit:
 
-Incurajata si de tatal meu si avand toate piesele necesare, m-am hotarat sa fac un radio functional.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// Rotary Encoder Inputs
+#define CLK 2
+#define DT 3
+#define SW 4
+
+int counter = 0;
+int currentStateCLK;
+int lastStateCLK;
+String currentDir ="";
+unsigned long lastButtonPress = 0;
+
+void setup() {
+  
+  // Set encoder pins as inputs
+  pinMode(CLK,INPUT);
+  pinMode(DT,INPUT);
+  pinMode(SW, INPUT_PULLUP);
+
+  // Setup Serial Monitor
+  Serial.begin(9600);
+
+  // Read the initial state of CLK
+  lastStateCLK = digitalRead(CLK);
+}
+
+void loop() {
+  
+  // Read the current state of CLK
+  currentStateCLK = digitalRead(CLK);
+
+  // If last and current state of CLK are different, then pulse occurred
+  // React to only 1 state change to avoid double count
+  if (currentStateCLK != lastStateCLK  && currentStateCLK == 1){
+
+    // If the DT state is different than the CLK state then
+    // the encoder is rotating CCW so decrement
+    if (digitalRead(DT) != currentStateCLK) {
+      counter --;
+      currentDir ="CCW";
+    } else {
+      // Encoder is rotating CW so increment
+      counter ++;
+      currentDir ="CW";
+    }
+
+    Serial.print("Direction: ");
+    Serial.print(currentDir);
+    Serial.print(" | Counter: ");
+    Serial.println(counter);
+  }
+
+  // Remember last CLK state
+  lastStateCLK = currentStateCLK;
+
+  // Read the button state
+  int btnState = digitalRead(SW);
+
+  //If we detect LOW signal, button is pressed
+  if (btnState == LOW) {
+    //if 50ms have passed since last LOW pulse, it means that the
+    //button has been pressed, released and pressed again
+    if (millis() - lastButtonPress > 50) {
+      Serial.println("Button pressed!");
+    }
+
+    // Remember last button press event
+    lastButtonPress = millis();
+  }
+
+  // Put in a slight delay to help debounce the reading
+  delay(1);
+}
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+♫♫♫ Ziua 8 - Incurajata si de tatal meu si avand toate piesele necesare, m-am hotarat sa fac un radio functional.
 Piesele necesare:
 -Placa plexiglas pentru montarea a doua placi beadboard full-sized din cauza multitudinii de module si fire
 -2 breadboard-uri full-sized
