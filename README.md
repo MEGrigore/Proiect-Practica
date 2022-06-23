@@ -740,6 +740,142 @@ Piesele necesare:
 -jumper wires
 -4 butoane: Volume Up, Volume Down, Frequency Up, Frequency Down
 
+Cod folosit:
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#include <Wire.h> 
+#include<RDA5807M.h> 
+#include <LiquidCrystal_I2C.h> 
+
+LiquidCrystal_I2C lcd(0x3F, 16, 2); 
+
+//volumul se setează din butoanele conectate la pinii 7 și 8 
+#define volumeDown 7 
+#define volumeUp 8 
+
+//frecventa se seteaza prin intermediul butoanelor conectate la pinii 9 și 10 
+#define frequencyDown 9 
+#define frequencyUp 10 
+
+//parametrii de configurare ai radioului 
+
+#define BAND RADIO_BAND_FM  // Banda va fi configurată pentru a receptiona undele FM 
+float frequency = 90.8; // Magic FM
+#define minFrequency 85.1 
+#define maxFrequency 108.0 
+int volume = 1;
+#define maxVolume 15 
+#define minVolume 0 
+RDA5807M radio;
+
+void refresh() 
+{
+  lcd.clear(); 
+  lcd.setCursor(0,0); 
+  lcd.print("Volum: "); 
+  lcd.print(volume); 
+  lcd.setCursor(0,1); 
+  lcd.print("Frecventa: ");  
+  lcd.print(frequency,1.0f); 
+} 
+
+void setup() 
+{ 
+  pinMode(volumeDown, INPUT_PULLUP); 
+  pinMode(volumeUp, INPUT_PULLUP); 
+
+  pinMode(frequencyDown, INPUT_PULLUP); 
+  pinMode(frequencyUp, INPUT_PULLUP); 
+
+  radio.init(); 
+  radio.setBandFrequency( BAND, frequency * 100 ); 
+  radio.setVolume( volume ); 
+
+  //dacă se utilizeaza un amplificator audio mono trebuie setat acest lucru prin  
+  // intermediul  comnezii "radio.setMono( true );" noi utilizam Stereo nu Mono 
+  radio.setMono(false); 
+  //se dezactiveaza modul mute prin intermediul metodei setMute 
+  radio.setMute(false); 
+
+  lcd.begin(); 
+  lcd.backlight(); 
+  delay(100); 
+  refresh(); 
+   
+}
+
+void loop() 
+{ 
+  //verificam dacă s-a apasat butonul pentru micsorarea volumului 
+  if( digitalRead(volumeDown) == LOW ) 
+     { 
+      if(volume > minVolume) //verificam ca volumul să nu fie minim 
+      { 
+          volume = volume - 1; // decrementăm volumul cu o unitate 
+           
+          if(volume == minVolume)  //dacă volumul setat este 0, sunetul trebuie oprit 
+              radio.setMute(true); 
+           else 
+              radio.setVolume( volume ); //in caz contrar, setați volumul corespunzător 
+           delay(150); //asteptați ca să se trimită noua configurație către modulul radio 
+           refresh(); //actualizați informațiile afisate pe ecran  
+           delay(100); //asteptați ca informatiile să se afiseze pe ecran 
+      } 
+     } 
+
+ //verificam dacă s-a apasat buton pentru cresterea volumului 
+ if( digitalRead(volumeUp) == LOW ) 
+     { 
+      if(volume < maxVolume) //verificam ca volumul să nu fie maxim 
+      {   
+          if(volume == minVolume ) 
+             radio.setMute( false ); 
+              
+          volume = volume + 1 ; // creștem volumul cu o unitatea 
+          radio.setVolume( volume ); //setam noul volum 
+          delay(150); //asteptam să se trimită noua configurație către modulul radio 
+          refresh(); //actualizam informațiile afisate pe ecran  
+          delay(100); //asteptam ca informatiile să se afiseze pe ecran 
+      } 
+     } 
+      
+//verificam daca s-a apăsat butonul corespunzător scăderii frecvenței 
+if( digitalRead(frequencyDown) == LOW ) 
+     { 
+      if(frequency > minFrequency)  
+      { 
+          frequency = frequency - 0.1; //decrementam frecventa cu 0.1Mhz 
+          radio.setBandFrequency(BAND, frequency * 100 ); //setam noua frecvență 
+          delay(150); //asteptam să se trimită noua configurație către modulul radio 
+
+ 
+
+          refresh(); //actualizam informațiile afisate pe ecran  
+          delay(100); //asteptam ca informatiile să se afiseze pe ecran 
+      } 
+     } 
+
+ 
+
+//verificam dacă s-a apăsat butonul corespunzător creșterii frecvenței 
+if( digitalRead(frequencyUp) == LOW ) 
+     { 
+      if(frequency < maxFrequency)  
+       { 
+          frequency = frequency + 0.1; //decrementam frecventa cu 0.1Mhz 
+          radio.setBandFrequency(BAND, frequency * 100 ); //setam noua frecvență 
+          delay(150); //asteptam să se trimită noua configurație către modulul radio 
+
+ 
+
+          refresh(); //actualizam informațiile afisate pe ecran  
+          delay(100); //asteptam ca informatiile să se afiseze pe ecran 
+       } 
+     } 
+  
+} 
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
